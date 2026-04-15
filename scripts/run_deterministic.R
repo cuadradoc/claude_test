@@ -24,9 +24,9 @@ cat("Definiendo parámetros del caso base...\n")
 params_base <- define_parameters(psa = FALSE)
 
 cat(sprintf("  Año base:              %d\n",    params_base$year))
-cat(sprintf("  Población adulta:      %s\n",    formatC(params_base$pop_adult, big.mark=".", format="d")))
+cat(sprintf("  Población adulta:      %s\n",    fmt_int(params_base$pop_adult)))
 cat(sprintf("  Prevalencia obesidad:  %.1f%%\n", params_base$prev_obesity * 100))
-cat(sprintf("  N° personas obesas:    %s\n",    formatC(params_base$n_obese, big.mark=".", format="d")))
+cat(sprintf("  N° personas obesas:    %s\n",    fmt_int(params_base$n_obese)))
 cat(sprintf("  PIB (USD):             %.1f mil millones\n", params_base$gdp_usd / 1e9))
 cat("\n")
 
@@ -57,8 +57,9 @@ cat("Resultados base guardados en: output/psa/results_base.rds\n")
 cat("\nEjecutando análisis de sensibilidad univariado (tornado)...\n")
 tornado_data <- run_tornado(params_base)
 
-write.csv(tornado_data, "output/tables/tabla4_tornado.csv",
-          row.names = FALSE, fileEncoding = "UTF-8")
+write.csv(tornado_data,
+          file("output/tables/tabla4_tornado.csv", encoding = "UTF-8"),
+          row.names = FALSE)
 cat("Datos del tornado guardados en: output/tables/tabla4_tornado.csv\n")
 
 cat("\n")

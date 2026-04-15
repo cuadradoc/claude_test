@@ -70,8 +70,9 @@ cat("Resultados PSA guardados en: output/psa/psa_results.rds\n")
 psa_summary <- save_psa_summary(psa_df, "output/tables")
 
 # Guardar CSV completo de iteraciones
-write.csv(psa_df, "output/psa/psa_iterations.csv",
-          row.names = FALSE, fileEncoding = "UTF-8")
+write.csv(psa_df,
+          file("output/psa/psa_iterations.csv", encoding = "UTF-8"),
+          row.names = FALSE)
 cat("Iteraciones completas guardadas en: output/psa/psa_iterations.csv\n")
 
 cat("\n")

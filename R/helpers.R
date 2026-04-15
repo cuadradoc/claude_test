@@ -5,6 +5,9 @@
 
 #' Carga (e instala si es necesario) los paquetes requeridos.
 load_packages <- function() {
+  # Asegurar locale UTF-8 para manejar correctamente caracteres especiales
+  Sys.setlocale("LC_ALL", "C.utf8")
+
   required <- c("dplyr", "tidyr", "ggplot2", "scales", "openxlsx", "knitr")
   for (pkg in required) {
     if (!requireNamespace(pkg, quietly = TRUE)) {
@@ -34,7 +37,7 @@ fmt_usd <- function(x, digits = 2) {
 fmt_pct_gdp <- function(pct) sprintf("%.2f%% del PIB", pct)
 
 #' Formatea número entero con separadores de miles.
-fmt_int <- function(x) formatC(round(x), format = "d", big.mark = ".")
+fmt_int <- function(x) formatC(round(x), format = "d", big.mark = ",")
 
 # =============================================================================
 # IMPRESIÓN DE RESULTADOS EN CONSOLA
@@ -81,7 +84,7 @@ print_summary <- function(results) {
 
   cat("\n================================================================\n")
   cat(sprintf("  COSTO TOTAL:   %s\n",     fmt_usd(s$total_cost_usd)))
-  cat(sprintf("  % del PIB:     %s\n",     fmt_pct_gdp(s$pct_gdp)))
+  cat(sprintf("  %% del PIB:    %s\n",     fmt_pct_gdp(s$pct_gdp)))
   cat(sprintf("  Per cápita:    %s\n",     fmt_usd(s$per_capita_usd)))
   cat(sprintf("  Por obeso/a:   %s\n",     fmt_usd(s$per_obese_usd)))
   cat("================================================================\n\n")
@@ -122,8 +125,9 @@ save_outputs <- function(results, output_dir = "output/tables") {
   )
   tab_direct <- tab_direct[order(-tab_direct$Costo_Total_MUSD), ]
 
-  write.csv(tab_direct, file.path(output_dir, "tabla1_costos_directos.csv"),
-            row.names = FALSE, fileEncoding = "UTF-8")
+  write.csv(tab_direct,
+            file(file.path(output_dir, "tabla1_costos_directos.csv"), encoding = "UTF-8"),
+            row.names = FALSE)
 
   # --- Tabla 2: Resumen de costos ---
   tab_summary <- data.frame(
@@ -144,8 +148,9 @@ save_outputs <- function(results, output_dir = "output/tables") {
   tab_summary$Monto_MUSD <- round(tab_summary$Monto_MUSD, 1)
   tab_summary$Porcentaje <- round(tab_summary$Porcentaje, 1)
 
-  write.csv(tab_summary, file.path(output_dir, "tabla2_resumen_costos.csv"),
-            row.names = FALSE, fileEncoding = "UTF-8")
+  write.csv(tab_summary,
+            file(file.path(output_dir, "tabla2_resumen_costos.csv"), encoding = "UTF-8"),
+            row.names = FALSE)
 
   # --- Excel con ambas tablas ---
   wb <- openxlsx::createWorkbook()
@@ -183,8 +188,9 @@ save_psa_summary <- function(psa_df, output_dir = "output/tables") {
     )
   }))
 
-  write.csv(psa_summary, file.path(output_dir, "tabla3_psa_summary.csv"),
-            row.names = FALSE, fileEncoding = "UTF-8")
+  write.csv(psa_summary,
+            file(file.path(output_dir, "tabla3_psa_summary.csv"), encoding = "UTF-8"),
+            row.names = FALSE)
 
   cat(sprintf("Resumen PSA guardado en: %s\n", output_dir))
   invisible(psa_summary)

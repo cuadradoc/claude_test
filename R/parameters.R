@@ -151,7 +151,7 @@ define_parameters <- function(psa = FALSE, seed = NULL) {
     p$days_lost_obese     <- rgamma(1, shape = 16, rate = 16 / 8.2)
     p$days_lost_non_obese <- rgamma(1, shape = 16, rate = 16 / 3.5)
     p$presenteeism_factor <- rbeta(1, shape1 = 6, shape2 = 234)  # ~2.5%
-    p$mortality_friction  <- rbeta_pert(1, min = 0.55, mode = 0.65, max = 0.75)
+    p$mortality_friction  <- rbeta_pert(1, min = 0.55, mode = 0.63, max = 0.75)
   } else {
     p$days_lost_obese     <- 8.2    # Días perdidos/año trabajador obeso
     p$days_lost_non_obese <- 3.5    # Días perdidos/año trabajador no obeso
@@ -184,9 +184,18 @@ define_parameters <- function(psa = FALSE, seed = NULL) {
 #' @param max    Valor máximo.
 #' @param lambda Factor de forma (default 4 = PERT estándar).
 rbeta_pert <- function(n, min, mode, max, lambda = 4) {
+  if (max <= min || n < 1) return(rep(mode, n))
   mu     <- (min + lambda * mode + max) / (lambda + 2)
-  alpha1 <- (mu - min) * (2 * mode - min - max) / ((mode - mu) * (max - min))
-  alpha2 <- alpha1 * (max - mu) / (mu - min)
-  if (alpha1 <= 0 || alpha2 <= 0) return(rep(mode, n))
+  denom1 <- (mode - mu) * (max - min)
+  denom2 <- mu - min
+  # Caso degenerado: mode en el punto medio — denominador nulo
+  if (abs(denom1) < 1e-10 || abs(denom2) < 1e-10) {
+    return(runif(n, min, max))
+  }
+  alpha1 <- (mu - min) * (2 * mode - min - max) / denom1
+  alpha2 <- alpha1 * (max - mu) / denom2
+  if (!is.finite(alpha1) || !is.finite(alpha2) || alpha1 <= 0 || alpha2 <= 0) {
+    return(rep(mode, n))
+  }
   min + (max - min) * rbeta(n, alpha1, alpha2)
 }
