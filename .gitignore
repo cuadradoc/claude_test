@@ -5,3 +5,9 @@ data/raw/
 .Rproj.user
 *.DS_Store
 *.log
+
+# Datos crudos y manuscrito privado del tesista (no versionar)
+CUBO.parquet
+*.csv
+MANUSCRIPT.txt
+PANEL_BRIEF.md
