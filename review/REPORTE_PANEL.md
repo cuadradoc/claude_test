@@ -144,3 +144,45 @@ Se reconstruyó el dataset del notebook (`load_coberturas_servicios(mayor40=TRUE
 
 > *Nota de alcance*: se replicó y estresó el modelo EDA-disponibilidad lag 1 como caso testigo. Las mismas pruebas (FE, NB, controles negativos, leads) deben aplicarse sistemáticamente a **todas** las exposiciones×lags antes de cualquier afirmación causal.
 
+---
+
+## 5. Event study y controles negativos (implementación, R: fixest / did)
+
+Implementación de las Prioridades 3 y 4. Para evitar la circularidad del offset (§2.1), **todos** los outcomes de mortalidad usan **denominador poblacional** (no Casos-RIMH). Scripts: `review/scripts/eventstudy_negcontrols.R`.
+
+### 5.1. Event study — DiD escalonado de Callaway–Sant'Anna
+**Diseño**: tratamiento = una red **supera 1,5× su disponibilidad de EDA per cápita basal (2011)**; adopción escalonada (cohortes en períodos 2/3/4/5; 24 redes nunca-tratadas como control). Outcome = tasa de mortalidad por CG /100k. Estimador de regresión, bandas simultáneas 95%.
+
+| Métrica | Estimado | SE | IC 95% |
+|---|---|---|---|
+| **ATT global (dinámico)** | **+0.68** | 1.68 | **[−2.62, +3.97]** |
+| ATT global (simple) | +0.30 | 1.35 | cubre 0 |
+
+**Efectos dinámicos** (event time): pre-tratamiento (−4,−3,−2) = +1.58 / +2.02 / +1.38 (ns); post (0,1,2,3) = −0.09 / +0.91 / −0.12 / +2.00 (**todos ns**). **Las bandas simultáneas cubren 0 en todos los tiempos** → **no hay efecto detectable** de la expansión de EDA sobre la mortalidad por CG. (Ver `event_study_CS.png`.)
+
+> **El hallazgo "protector" del modelo original NO sobrevive a un diseño cuasi-experimental.** *Caveat de poder*: 45 unidades × 5 períodos con cohortes pequeñas (advertencia explícita del paquete) → "ausencia de evidencia ≠ evidencia de ausencia"; requiere análisis de sensibilidad al umbral de tratamiento.
+
+### 5.2. Event study TWFE de tratamiento continuo (leads/lags, offset poblacional, FE red+período, SE cluster)
+`Deaths_t ~ Endo(t+1)[lead] + Endo(t) + Endo(t−1)[lag]`:
+
+| Término | β (SE) | Lectura |
+|---|---|---|
+| Endo (t+1) — **lead/placebo** | −0.022 (0.045) ns | ✔ sin señal anti-causal evidente |
+| Endo (t) — contemporáneo | **+0.072\*** (0.034) | ⚠️ **positivo y significativo**: más EDA ↔ **más** muertes mismo período (severidad / causalidad inversa) |
+| Endo (t−1) — lag | −0.043. (0.023) p<0.1 | único indicio "protector", **marginal** |
+
+> Con efectos fijos de dos vías, **la asociación contemporánea se invierte a positiva y significativa** y solo queda un lag débil — desmonta en gran medida la narrativa simple del "lag-1 protector".
+
+### 5.3. Controles negativos
+
+| # | Control negativo | Resultado | Interpretación |
+|---|---|---|---|
+| B1 | **Exposición futura** (placebo anti-causal): mort_t ~ Endo(t+1) | +0.034 (0.023) ns | No significativo (aunque positivo): sin evidencia fuerte de tendencia espuria, pero **no** apoya protección |
+| B2 | **Exposiciones proxy de capacidad** sobre mortalidad CG | HP-trat: −0.001 (0.020) **nulo**; Consultas: +0.027 (0.026) **nulo** | ✔ Tranquilizador: no *todo* correlaciona; los proxies de capacidad no fingen protección |
+| B3 | **Outcome placebo**: mortalidad CG en **<40 años** (el tamizaje 40+ no debería afectarla) | +0.088 (0.095) **nulo** | ✔ Control negativo de resultado **se comporta como debe** (nulo); baja potencia (487 muertes) |
+
+### 5.4. Síntesis del módulo empírico
+- El **event study escalonado no detecta efecto** de la expansión de EDA sobre la mortalidad por CG; la TWFE continua muestra que la asociación contemporánea es **positiva** (severidad/causalidad inversa) con solo un lag marginal.
+- Los **controles negativos son mayormente tranquilizadores** (outcome placebo <40 nulo; exposiciones-proxy nulas), lo que indica que la *no detección* del efecto **no** se debe a que "todo está confundido", sino a que **la señal protectora específica es frágil y no resiste la identificación within**.
+- **Implicación para los autores**: la evidencia es consistente con un papel **descriptivo/de equidad** del estudio, pero **no sostiene** la afirmación causal de efectividad sobre mortalidad con el diseño actual. Próximos pasos: (i) sensibilidad al umbral y a definiciones alternativas de "expansión"; (ii) estimadores robustos adicionales (de Chaisemartin–D'Haultfœuille); (iii) negative-control **outcome** externo (mortalidad por otra causa, requiere DW_DEFUNCIONES, fuera de la carpeta compartida); (iv) repetir para HP→incidencia con ventanas de latencia largas.
+

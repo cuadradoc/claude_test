@@ -1,0 +1,142 @@
+################################################################
+#  PARTE A — EVENT STUDY
+################################################################
+
+===== A1. Callaway–Sant'Anna staggered DiD (outcome = tasa mortalidad CG /100k, denominador POBLACIONAL) =====
+Tratamiento = red supera 1.5x su disponibilidad EDA per capita basal (2011). Controles: never-treated.
+
+Warning message:
+In did_standardization(data, args) :
+  Some groups in your dataset have very few observations, which may cause estimation problems.
+  Check groups: 4,2,5.
+
+Call:
+aggte(MP = cs, type = "dynamic", na.rm = TRUE)
+
+Reference: Callaway, Brantly and Pedro H.C. Sant'Anna.  "Difference-in-Differences with Multiple Time Periods." Journal of Econometrics, Vol. 225, No. 2, pp. 200-230, 2021. <https://doi.org/10.1016/j.jeconom.2020.12.001>, <https://arxiv.org/abs/1803.09015> 
+
+
+Overall summary of ATT's based on event-study/dynamic aggregation:  
+    ATT    Std. Error     [ 95%  Conf. Int.] 
+ 0.6754        1.6829     -2.623      3.9738 
+
+
+Dynamic Effects:
+ Event time Estimate Std. Error [95% Simult.  Conf. Band] 
+         -4   1.5815     4.2139       -8.7188     11.8819 
+         -3   2.0204     2.3215       -3.6542      7.6949 
+         -2   1.3822     1.5884       -2.5004      5.2649 
+         -1   0.0000         NA            NA          NA 
+          0  -0.0904     1.8553       -4.6254      4.4446 
+          1   0.9128     1.6075       -3.0164      4.8421 
+          2  -0.1235     1.8474       -4.6391      4.3922 
+          3   2.0026     4.2388       -8.3585     12.3637 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Control Group:  Never Treated,  Anticipation Periods:  0
+Estimation Method:  Outcome Regression
+NULL
+
+ATT global (simple): 0.302  SE: 1.345 
+null device 
+          1 
+[guardado event_study_CS.png]
+
+===== A2. Event study TWFE de tratamiento CONTINUO con leads/lags (offset poblacional) =====
+Deaths_t ~ Endo(t+1)[LEAD/placebo] + Endo(t) + Endo(t-1)[LAG] | red + periodo ; SE cluster-red
+
+NOTE: 90 observations removed because of NA values (RHS: 90).
+                             m_es
+Dependent Var.:   DefuncionesHosp
+                                 
+Endo_z_lead1     -0.0216 (0.0447)
+Endo_z           0.0721* (0.0336)
+Endo_z_lag1     -0.0426. (0.0233)
+PorcRural         0.0004 (0.0115)
+PorcPobreza       0.0007 (0.0035)
+Fixed-Effects:  -----------------
+Cluster                       Yes
+pidx                          Yes
+_______________ _________________
+S.E.: Clustered       by: Cluster
+Observations                  135
+Squared Cor.              0.97402
+Pseudo R2                 0.84011
+BIC                       1,235.9
+---
+Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+################################################################
+#  PARTE B — CONTROLES NEGATIVOS
+################################################################
+
+===== B1. PLACEBO de exposición FUTURA (anti-causal): mortalidad_t ~ Endo(t+1) | FE =====
+Si la exposición FUTURA 'predice' la mortalidad presente => confusión/tendencia (no efecto causal).
+
+NOTE: 45 observations removed because of NA values (RHS: 45).
+                          m_lead
+Dependent Var.:  DefuncionesHosp
+                                
+Endo_z_lead1     0.0338 (0.0234)
+PorcRural       -0.0048 (0.0068)
+PorcPobreza     0.0050. (0.0030)
+Fixed-Effects:  ----------------
+Cluster                      Yes
+pidx                         Yes
+_______________ ________________
+S.E.: Clustered      by: Cluster
+Observations                 180
+Squared Cor.             0.96961
+Pseudo R2                0.83812
+BIC                      1,621.9
+---
+Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+===== B2. EXPOSICIONES de control negativo (proxies de capacidad del sistema) sobre mortalidad CG =====
+HP-treatment actúa sobre INCIDENCIA (años antes), no sobre letalidad contemporánea; consultas = capacidad general.
+Si 'protegen' igual que la EDA => la señal refleja capacidad/calidad general, no el mecanismo de tamizaje.
+
+                          m_real             m_hp           m_cons
+                       EDA(real)      HP-trat(NC)    Consultas(NC)
+Dependent Var.:  DefuncionesHosp  DefuncionesHosp  DefuncionesHosp
+                                                                  
+Endo_z          0.0374. (0.0225)                                  
+PorcRural       -0.0026 (0.0054) -0.0013 (0.0060) -0.0001 (0.0057)
+PorcPobreza     0.0050. (0.0029)  0.0049 (0.0030)  0.0047 (0.0030)
+TratHP_z                         -0.0011 (0.0202)                 
+Consult_z                                          0.0265 (0.0261)
+Fixed-Effects:  ---------------- ---------------- ----------------
+Cluster                      Yes              Yes              Yes
+pidx                         Yes              Yes              Yes
+_______________ ________________ ________________ ________________
+S.E.: Clustered      by: Cluster      by: Cluster      by: Cluster
+Observations                 225              225              225
+Squared Cor.             0.96620          0.96464          0.96525
+Pseudo R2                0.83673          0.83601          0.83626
+BIC                      1,985.4          1,992.8          1,990.2
+---
+Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+===== B3. OUTCOME de control negativo: mortalidad CG en <40 años (el tamizaje 40+ no debería afectarla) =====
+Total muertes <40 = 487 (baja potencia; signo/nulidad es lo informativo)
+
+                           m_u40
+Dependent Var.:        DeathsU40
+                                
+Endo_z           0.0878 (0.0951)
+PorcRural        0.0258 (0.0331)
+PorcPobreza     -0.0098 (0.0133)
+Fixed-Effects:  ----------------
+Cluster                      Yes
+pidx                         Yes
+_______________ ________________
+S.E.: Clustered      by: Cluster
+Observations                 225
+Squared Cor.             0.56215
+Pseudo R2                0.21888
+BIC                       974.00
+---
+Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+DONE
