@@ -186,3 +186,40 @@ Implementación de las Prioridades 3 y 4. Para evitar la circularidad del offset
 - Los **controles negativos son mayormente tranquilizadores** (outcome placebo <40 nulo; exposiciones-proxy nulas), lo que indica que la *no detección* del efecto **no** se debe a que "todo está confundido", sino a que **la señal protectora específica es frágil y no resiste la identificación within**.
 - **Implicación para los autores**: la evidencia es consistente con un papel **descriptivo/de equidad** del estudio, pero **no sostiene** la afirmación causal de efectividad sobre mortalidad con el diseño actual. Próximos pasos: (i) sensibilidad al umbral y a definiciones alternativas de "expansión"; (ii) estimadores robustos adicionales (de Chaisemartin–D'Haultfœuille); (iii) negative-control **outcome** externo (mortalidad por otra causa, requiere DW_DEFUNCIONES, fuera de la carpeta compartida); (iv) repetir para HP→incidencia con ventanas de latencia largas.
 
+---
+
+## 6. Estimador alternativo, sensibilidad al umbral y réplica en la rama HP→incidencia
+
+Extensión del módulo empírico (script `review/scripts/eventstudy_part2.R`; resultados en `review/eventstudy_part2_results.txt`). *Nota técnica:* el paquete dinámico de de Chaisemartin–D'Haultfœuille (`DIDmultiplegtDYN`) y su versión estática (`DIDmultiplegt`) no pudieron instalarse en el entorno (dependencias de gráficos/OpenGL `rgl`/`matlib` y la cadena `sass`/`fs`). Se usó **Sun & Abraham** (`fixest::sunab`) como estimador robusto a heterogeneidad alternativo a Callaway–Sant'Anna (CS) — equivalente en propósito.
+
+### 6.1. Rama EDA — robustez del null (mortalidad)
+**Sensibilidad al umbral de "expansión"** (CS-DiD, ATT simple, control not-yet-treated):
+
+| Umbral | Tratadas / Controles | ATT | IC 95% |
+|---|---|---|---|
+| 1,25× basal | 36 / 9 | +1,36 | [−1,49, +4,20] |
+| 1,50× basal | 21 / 24 | +0,37 | [−2,52, +3,25] |
+| 2,00× basal | 10 / 35 | −0,48 | [−5,63, +4,66] |
+
+**Sun & Abraham** (mortalidad): ATT = **+0,30** (SE 1,35, p=0,82); coeficientes por tiempo-evento sin patrón protector post-tratamiento. → **El null es robusto al umbral y se confirma con un segundo estimador**; los puntos oscilan alrededor de 0 con cambios de signo (ruido), no una protección consistente.
+
+### 6.2. Rama HP → incidencia — batería completa
+**(a) CS-DiD escalonado** (outcome = incidencia /100k, control not-yet-treated): ATT dinámico = **+0,65** (IC [−1,43, +2,74]); ATT simple = +0,33 (IC [−1,45, +2,10]). Pre-tratamiento plano (−0,19/+0,04/+0,83, **sin pre-trend**); post sin reducción (+0,23/+1,03/−0,82/+2,17, todos ns). Ver `event_study_HP_CS.png`.
+
+**(b) Sun & Abraham** (incidencia): ATT = **+0,85** (SE 0,87, p=0,33) → null, **signo positivo** (dirección equivocada para un efecto protector). Coincide con CS.
+
+**(c) TWFE continuo leads/lags** (Poisson, offset pob, FE): lead(t+1) −0,002 ns · contemp +0,076 ns · lag1 +0,020 ns · lag2 −0,018 ns → **sin dosis-respuesta a ningún horizonte**.
+
+**(d) Controles negativos (HP):**
+
+| Control | Resultado | Lectura |
+|---|---|---|
+| Exposición **futura** (placebo): incid_t ~ HPcov(t+1) | +0,002 (p=0,93) | ✔ **limpio nulo** |
+| **Proxies de capacidad** → incidencia | Endo: **+0,042\***; Consultas: **+0,036\*** | ⚠️ la **capacidad de detección** sube la incidencia medida (confusión por *case-finding*), mientras HP-real es nulo (+0,019 ns) |
+| **Latencia (lag-response)** | lag0 +0,019 (p=0,26); lag1 +0,0003 (p=0,99); lag2 −0,001 (p=0,97) | ⚠️ un efecto real de erradicación debería **crecer** con el lag; en cambio es **nulo y plano** → refuta el "lag-1 protector" y confirma la implausibilidad por latencia (§2.8) |
+
+### 6.3. Veredicto del módulo extendido
+- **Ningún brazo sobrevive** a la identificación cuasi-experimental robusta a heterogeneidad: EDA→mortalidad es **nulo** en CS, Sun-Abraham y los tres umbrales; HP→incidencia es **nulo** en CS, Sun-Abraham, leads/lags continuos, con **signo positivo** y una **lag-response plana** que contradice la biología de la cascada de Correa.
+- Los **controles negativos se comportan bien** (placebo de exposición futura nulo en ambas ramas); las **únicas** asociaciones significativas son **capacidad→incidencia** (endoscopías/consultas), es decir, exactamente el mecanismo de **confusión por detección/case-finding** que el panel anticipó.
+- **Conclusión consolidada**: las asociaciones "protectoras" rezagadas del modelo original (intercepto aleatorio) para **ambas** intervenciones son **atribuibles a comparaciones entre redes** (capacidad/calidad del sistema, detección), no a efectos causales *within*-red. *Caveat de poder* (45×5, cohortes pequeñas con advertencias del paquete): "ausencia de evidencia ≠ evidencia de ausencia"; el aparato debe acompañarse de un registro de cáncer real (incidencia no-RIMH) y de mayor N temporal para una conclusión definitiva.
+

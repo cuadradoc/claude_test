@@ -1,0 +1,153 @@
+##################################################################
+#  PARTE 1 — RAMA EDA: SENSIBILIDAD AL UMBRAL + ESTIMADORES ALTERNATIVOS
+##################################################################
+
+=== 1a. Sensibilidad del umbral de 'expansión' (CS-DiD, ATT simple, outcome=tasa mortalidad/100k) ===
+  umbral 1.25x | tratadas=36 controles=9 | ATT=+1.355 SE=1.453 IC95=[-1.49,+4.20]
+  umbral 1.50x | tratadas=21 controles=24 | ATT=+0.366 SE=1.472 IC95=[-2.52,+3.25]
+  umbral 2.00x | tratadas=10 controles=35 | ATT=-0.484 SE=2.627 IC95=[-5.63,+4.66]
+Warning messages:
+1: In did_standardization(data, args) :
+  Some groups in your dataset have very few observations, which may cause estimation problems.
+  Check groups: 4.
+2: In did_standardization(data, args) :
+  Some groups in your dataset have very few observations, which may cause estimation problems.
+  Check groups: 4,2,5.
+3: In did_standardization(data, args) :
+  Some groups in your dataset have very few observations, which may cause estimation problems.
+  Check groups: 5,3,2.
+
+=== 1b. Estimador alternativo Sun & Abraham (fixest::sunab), EDA expansión 1.5x, outcome=tasa mort/100k ===
+OLS estimation, Dep. Var.: mortrate
+Observations: 225
+Fixed-effects: Cluster: 45,  pidx: 5
+Standard-errors: Clustered (Cluster) 
+            Estimate Std. Error  t value Pr(>|t|)    
+ATT         0.302831   1.353091 0.223807 0.823943    
+PorcRural   0.429444   0.207040 2.074209 0.043943 *  
+PorcPobreza 0.291513   0.115154 2.531501 0.015005 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 3.90995     Adj. R2: 0.822859
+                Within R2: 0.192157
+Coeficientes por tiempo-evento (Sun-Abraham):
+pidx::-4 pidx::-3 pidx::-2  pidx::0  pidx::1  pidx::2  pidx::3 
+  1.5078   0.7623   0.4983  -0.1132   0.8047   0.0803   1.8512 
+
+
+##################################################################
+#  PARTE 2 — RAMA HP -> INCIDENCIA: BATERÍA COMPLETA
+##################################################################
+(Outcome = incidencia CG /100k, denom poblacional. Tratamiento = cobertura HP > mediana nacional post-2013)
+
+=== 2a. CS-DiD escalonado (Callaway-Sant'Anna), control = not-yet-treated, outcome=incidencia ===
+Warning message:
+In did_standardization(data, args) :
+  Some groups in your dataset have very few observations, which may cause estimation problems.
+  Check groups: 4.
+
+Call:
+aggte(MP = cs_hp, type = "dynamic", na.rm = TRUE)
+
+Reference: Callaway, Brantly and Pedro H.C. Sant'Anna.  "Difference-in-Differences with Multiple Time Periods." Journal of Econometrics, Vol. 225, No. 2, pp. 200-230, 2021. <https://doi.org/10.1016/j.jeconom.2020.12.001>, <https://arxiv.org/abs/1803.09015> 
+
+
+Overall summary of ATT's based on event-study/dynamic aggregation:  
+   ATT    Std. Error     [ 95%  Conf. Int.] 
+ 0.653        1.0633    -1.4311      2.7371 
+
+
+Dynamic Effects:
+ Event time Estimate Std. Error [95% Simult.  Conf. Band] 
+         -4  -0.1879     1.6336       -4.1783      3.8025 
+         -3   0.0405     1.5566       -3.7620      3.8429 
+         -2   0.8262     1.0825       -1.8179      3.4703 
+         -1   0.0000         NA            NA          NA 
+          0   0.2341     0.8083       -1.7403      2.2085 
+          1   1.0259     0.9658       -1.3333      3.3852 
+          2  -0.8165     1.5400       -4.5782      2.9452 
+          3   2.1686     2.1956       -3.1947      7.5318 
+---
+Signif. codes: `*' confidence band does not cover 0
+
+Control Group:  Not Yet Treated,  Anticipation Periods:  0
+Estimation Method:  Outcome Regression
+NULL
+ATT simple = +0.329 SE=0.905 IC95=[-1.45,+2.10]
+null device 
+          1 
+[guardado event_study_HP_CS.png]
+
+=== 2b. Estimador alternativo Sun & Abraham (HP) ===
+OLS estimation, Dep. Var.: incidence
+Observations: 225
+Fixed-effects: Cluster: 45,  pidx: 5
+Standard-errors: Clustered (Cluster) 
+             Estimate Std. Error   t value Pr(>|t|)    
+ATT          0.852818   0.873145  0.976719 0.334048    
+PorcRural   -0.038602   0.121901 -0.316668 0.752993    
+PorcPobreza  0.116861   0.053181  2.197442 0.033298 *  
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+RMSE: 2.16152     Adj. R2: 0.825116
+                Within R2: 0.137391
+Coeficientes por tiempo-evento (Sun-Abraham):
+pidx::-4 pidx::-3 pidx::-2  pidx::0  pidx::1  pidx::2  pidx::3 
+  0.3493   0.1473   0.4193   0.6392   0.6976   0.5416   3.6256 
+
+=== 2c. TWFE continuo leads/lags: incidencia ~ HPcov(t+1)[lead]+HPcov(t)+HPcov(t-1)+HPcov(t-2) (Poisson, offset pob, FE) ===
+NOTE: 135 observations removed because of NA values (RHS: 135).
+                         m_hp_es
+Dependent Var.:      CasosFonasa
+                                
+HPcov_z_lead1   -0.0021 (0.0502)
+HPcov_z          0.0763 (0.0674)
+HPcov_z_lag1     0.0197 (0.0630)
+HPcov_z_lag2    -0.0176 (0.0367)
+PorcRural       -0.0272 (0.0194)
+PorcPobreza     -0.0015 (0.0043)
+Fixed-Effects:  ----------------
+Cluster                      Yes
+pidx                         Yes
+_______________ ________________
+S.E.: Clustered      by: Cluster
+Observations                  90
+Squared Cor.             0.99116
+Pseudo R2                0.92010
+BIC                       937.21
+---
+Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+=== 2d. CONTROLES NEGATIVOS (HP) ===
+B1. Placebo exposicion FUTURA: incidencia_t ~ HPcov(t+1) | FE
+NOTE: 45 observations removed because of NA values (RHS: 45).
+  HPcov(t+1): +0.0015 (SE 0.0186, p=0.934)
+B2. Exposiciones de control negativo (capacidad) sobre incidencia: Endoscopias, Consultas (contemporaneo)
+                       m_hp_real        m_hp_endo         m_hp_cons
+                        HP(real)         Endo(NC)     Consultas(NC)
+Dependent Var.:      CasosFonasa      CasosFonasa       CasosFonasa
+                                                                   
+HPcov_z          0.0190 (0.0170)                                   
+PorcRural       -0.0046 (0.0052) -0.0073 (0.0051)  -0.0046 (0.0050)
+PorcPobreza     0.0035* (0.0014) 0.0033* (0.0013) 0.0033** (0.0013)
+Endo_z                           0.0415* (0.0180)                  
+Consult_z                                          0.0359* (0.0145)
+Fixed-Effects:  ---------------- ---------------- -----------------
+Cluster                      Yes              Yes               Yes
+pidx                         Yes              Yes               Yes
+_______________ ________________ ________________ _________________
+S.E.: Clustered      by: Cluster      by: Cluster       by: Cluster
+Observations                 225              225               225
+Squared Cor.             0.98397          0.98464           0.98492
+Pseudo R2                0.91559          0.91614           0.91597
+BIC                      2,158.1          2,145.8           2,149.7
+---
+Signif. codes: 0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+B3. LATENCIA (lag-response): un efecto real de erradicacion HP debe CRECER con el lag
+  HPcov_z      : +0.0190 (p=0.264)
+NOTE: 45 observations removed because of NA values (RHS: 45).
+  HPcov_z_lag1 : +0.0003 (p=0.990)
+NOTE: 90 observations removed because of NA values (RHS: 90).
+  HPcov_z_lag2 : -0.0009 (p=0.967)
+
+DONE
