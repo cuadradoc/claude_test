@@ -13,5 +13,5 @@ MANUSCRIPT.txt
 PANEL_BRIEF.md
 # Archivos de trabajo en raíz (las versiones versionadas estan en review/)
 /*.R
-/eventstudy_results.txt
+/*.txt
 /*.png
