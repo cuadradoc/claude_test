@@ -126,7 +126,7 @@ Guárdalo en `~/.config/paper-search-mcp/.env`:
 
 ```bash
 PAPER_SEARCH_MCP_UNPAYWALL_EMAIL=tu@email.com   # polite pool de OpenAlex/Crossref/Unpaywall
-PAPER_SEARCH_MCP_CORE_API_KEY=                  # gratis en core.ac.uk; sin esto CORE no devuelve nada
+PAPER_SEARCH_MCP_CORE_API_KEY=                  # gratis en core.ac.uk; sin esto CORE funciona pero rate-limiteada
 PAPER_SEARCH_MCP_SEMANTIC_SCHOLAR_API_KEY=      # sube el límite de Semantic Scholar
 ```
 
