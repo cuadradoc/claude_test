@@ -31,14 +31,14 @@ vacío aislado como que la fuente está caída.
 | `hal` | Repositorio académico francés | no | OK† | Ídem. |
 | `openaire` | Agregador europeo de acceso abierto | no | OK | |
 | `dblp` | Bibliografía de ciencias de la computación | no | OK | Solo CS; para salud devuelve ruido. |
-| `core` | 200M+ artículos de repositorios | opcional | intermitente | Con clave gratuita de core.ac.uk se estabiliza. |
+| `core` | 200M+ artículos de repositorios | opcional | intermitente | Funciona sin clave; la clave gratuita de core.ac.uk sube el límite de tasa y la estabiliza. |
 | `google_scholar` | Todo, incluida literatura gris | no | intermitente | Frágil: bloquea por bot. Nunca lo pongas como única fuente. |
 
 ## Fuentes que no respondieron en este entorno
 
 | Fuente | Estado | Causa probable |
 |---|---|---|
-| `semantic` | vacío | Rate limit de Semantic Scholar (429) desde IP compartida. Con `PAPER_SEARCH_MCP_SEMANTIC_SCHOLAR_API_KEY` funciona. Vale la pena: aporta conteos de citas e influencia. |
+| `semantic` | vacío | Rate limit de Semantic Scholar (429). El pool sin autenticar está saturado: devuelve 429 incluso desde IP residencial. Con `PAPER_SEARCH_MCP_SEMANTIC_SCHOLAR_API_KEY` funciona. Vale la pena: aporta conteos de citas e influencia. |
 | `unpaywall` | vacío | No es un buscador por texto libre: resuelve DOIs. Úsalo vía `download`, no vía `search`. |
 | `iacr` | vacío | Solo criptografía. Un 0 para "obesity" es correcto, no una falla. |
 | `base` | vacío | Scraper de bielefeld.de; bloquea IPs de datacenter. |
