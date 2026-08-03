@@ -51,6 +51,20 @@ uv run $SKILL/scripts/paper_search.py doctor
 
 Sin `uv`: `pip install paper-search-mcp==0.1.4` y luego `python $SKILL/scripts/paper_search.py ...`.
 
+### Windows (PowerShell)
+
+El CLI es Python puro y funciona igual, pero la sintaxis del shell cambia: PowerShell
+continúa líneas con backtick (`` ` ``), no con `\`. Lo más simple es escribir cada comando
+en una sola línea:
+
+```powershell
+uv run $env:USERPROFILE\.claude\skills\academic-paper-search\scripts\paper_search.py search "obesity economic burden" --sources semantic --max 3
+```
+
+Instalación: `powershell -ExecutionPolicy Bypass -File scripts\install.ps1 -Email tu@email.com`
+(`install.sh` es solo para Linux, macOS, WSL y Git Bash). Si falta `uv`:
+`powershell -c "irm https://astral.sh/uv/install.ps1 | iex"` y reabre la terminal.
+
 ## Cómo usar los resultados
 
 `search` imprime un resumen compacto (título, autores, año, DOI, citas, en qué fuentes
