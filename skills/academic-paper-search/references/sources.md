@@ -2,11 +2,17 @@
 
 Medición hecha el 2026-08-03 con `paper_search.py doctor --query obesity` desde un
 sandbox de Claude Code en la nube (IP de datacenter compartida), con
-`PAPER_SEARCH_MCP_UNPAYWALL_EMAIL` configurado. **15/21 devolvieron resultados.**
+`PAPER_SEARCH_MCP_UNPAYWALL_EMAIL` configurado.
+
+**Entre 12 y 15 de 21 fuentes respondieron, según la corrida.** La variación no es ruido
+de medición: son límites de tasa que se activan y se sueltan. `openalex`, `core`,
+`google_scholar` y `semantic` alternan entre OK y vacío en corridas separadas con minutos
+de diferencia. Las de la tabla siguiente respondieron OK al menos una vez.
 
 La disponibilidad depende del entorno: desde una IP residencial normalmente funcionan
 más fuentes (los scrapers dejan de estar bloqueados); desde CI o sandboxes, menos.
-Corre `doctor` en cada entorno nuevo antes de asumir cobertura.
+Corre `doctor` en cada entorno nuevo antes de asumir cobertura, y no interpretes un
+vacío aislado como que la fuente está caída.
 
 ## Fuentes verificadas
 
@@ -16,7 +22,7 @@ Corre `doctor` en cada entorno nuevo antes de asumir cobertura.
 | `europepmc` | Biomedicina + texto completo abierto | no | OK | Mejor que PubMed cuando quieres el PDF, no solo la cita. |
 | `pmc` | Texto completo abierto de PubMed Central | no | OK | Todo lo que devuelve es descargable. |
 | `crossref` | 150M+ DOIs, todas las disciplinas | no | OK | Metadatos, no abstracts. Ideal para verificar citas. |
-| `openalex` | 250M+ obras, sucesor de MS Academic | no | OK* | *Sin email da 429 desde IPs compartidas. Trae conteo de citas. |
+| `openalex` | 250M+ obras, sucesor de MS Academic | no | intermitente | Da 429 desde IPs compartidas, incluso con email. Trae conteo de citas. |
 | `arxiv` | Preprints física/mate/CS/estadística | no | OK | PDF siempre disponible. |
 | `medrxiv` | Preprints en salud | no | OK | Sin revisión por pares — dilo al citar. |
 | `biorxiv` | Preprints en biología | no | OK | Ídem. |
@@ -25,8 +31,8 @@ Corre `doctor` en cada entorno nuevo antes de asumir cobertura.
 | `hal` | Repositorio académico francés | no | OK† | Ídem. |
 | `openaire` | Agregador europeo de acceso abierto | no | OK | |
 | `dblp` | Bibliografía de ciencias de la computación | no | OK | Solo CS; para salud devuelve ruido. |
-| `core` | 200M+ artículos de repositorios | opcional | OK | Con clave gratuita de core.ac.uk mejora bastante. |
-| `google_scholar` | Todo, incluida literatura gris | no | OK | Frágil: bloquea por bot. Nunca lo pongas como única fuente. |
+| `core` | 200M+ artículos de repositorios | opcional | intermitente | Con clave gratuita de core.ac.uk se estabiliza. |
+| `google_scholar` | Todo, incluida literatura gris | no | intermitente | Frágil: bloquea por bot. Nunca lo pongas como única fuente. |
 
 ## Fuentes que no respondieron en este entorno
 

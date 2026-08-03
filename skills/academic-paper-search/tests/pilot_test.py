@@ -203,7 +203,7 @@ def main() -> int:
         assert kept >= len(scored) * 0.5, (
             f"filter would drop {len(scored) - kept}/{len(scored)} real results "
             f"— threshold is too aggressive")
-        return (f"{kept}/{len(scored)} real results score >= 0.25 "
+        return (f"{kept}/{len(scored)} real results score >= 0.34 "
                 f"(median {sorted(scored)[len(scored) // 2]:.2f}, threshold 0.34)")
 
     # --- 8. DOI resolution -------------------------------------------------
@@ -287,6 +287,24 @@ def main() -> int:
     return 0 if req_pass == len(req) else 1
 
 
+def _polite_email() -> str:
+    """Resolve the email the same way the CLI does -- environment first, then
+    the .env file -- so the report header cannot contradict the doctor table
+    below it. Parsed directly rather than via paper_search_mcp.config, because
+    the test runner is plain python and need not have the library installed.
+    """
+    for var in ("PAPER_SEARCH_MCP_UNPAYWALL_EMAIL", "UNPAYWALL_EMAIL"):
+        if os.environ.get(var, "").strip():
+            return os.environ[var].strip()
+    env_file = Path.home() / ".config" / "paper-search-mcp" / ".env"
+    if env_file.is_file():
+        for line in env_file.read_text(encoding="utf-8").splitlines():
+            line = line.strip().removeprefix("export ").strip()
+            if line.startswith(("PAPER_SEARCH_MCP_UNPAYWALL_EMAIL=", "UNPAYWALL_EMAIL=")):
+                return line.split("=", 1)[1].strip().strip("'\"")
+    return ""
+
+
 def write_report(path: Path, req: list, opt: list, total_time: float) -> None:
     lines = [
         "# Pilot report — academic-paper-search",
@@ -294,8 +312,7 @@ def write_report(path: Path, req: list, opt: list, total_time: float) -> None:
         f"- Runner: `{'uv run' if shutil.which('uv') else sys.executable}`",
         f"- Python: {sys.version.split()[0]}",
         f"- Wall time: {total_time:.0f}s",
-        f"- Polite-pool email: "
-        f"{'set' if os.environ.get('PAPER_SEARCH_MCP_UNPAYWALL_EMAIL') or os.environ.get('UNPAYWALL_EMAIL') else 'not set'}",
+        f"- Polite-pool email: {'set' if _polite_email() else 'not set'}",
         "",
         "## Required tests",
         "",
