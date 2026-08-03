@@ -90,9 +90,16 @@ acepta `datetime`, string o `None`. Por eso aquí zenodo y hal funcionan y vía 
 1. El descargador nativo de la fuente.
 2. Repositorios de acceso abierto por DOI o título.
 3. Unpaywall (requiere el email configurado).
-4. Sci-Hub — **solo con `--allow-scihub`**.
+4. Sci-Hub — **activo por defecto**; `--no-scihub` corta la cadena en el paso 3.
 
-Sci-Hub está desactivado a propósito: distribuye artículos con derechos reservados sin
-permiso del editor y es ilegal en varias jurisdicciones. Cuando un PDF no se consigue por
-las tres primeras vías, lo correcto es reportar que está tras muro de pago y ofrecer el
+Los pasos 1-3 resuelven la mayoría de los casos y devuelven PDFs de procedencia limpia
+y citable. Sci-Hub solo se alcanza cuando los tres fallaron.
+
+Sci-Hub distribuye artículos con derechos reservados sin permiso del editor y su estatus
+legal varía por jurisdicción. Queda activo por defecto por decisión explícita del dueño
+del repositorio. Conviene usar `--no-scihub` cuando el PDF va a terminar en una
+publicación, un repositorio compartido o material institucional, donde la procedencia del
+archivo puede ser cuestionada.
+
+Si ninguna vía funciona, reporta que el artículo está tras muro de pago y ofrece el
 abstract, el acceso institucional o préstamo interbibliotecario.

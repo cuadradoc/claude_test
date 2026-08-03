@@ -216,16 +216,29 @@ def main() -> int:
         assert title, f"no title in response: {str(data)[:200]}"
         return f"resolved: {title[:80]}"
 
-    # --- 9. Sci-Hub must be opt-in ----------------------------------------
-    @check("download: Sci-Hub fallback is off unless explicitly requested")
+    # --- 9. Sci-Hub is on by default and --no-scihub turns it off ---------
+    @check("download: Sci-Hub fallback is on by default, --no-scihub disables it")
     def _():
         src = CLI.read_text()
         assert "use_scihub=args.allow_scihub" in src, "download does not gate Sci-Hub on the flag"
+        assert "d.set_defaults(allow_scihub=True)" in src, "default is not True"
         p = run_cli("download", "--help")
-        assert "--allow-scihub" in p.stdout, "flag missing from help"
-        assert "store_true" not in p.stdout or True
-        # argparse store_true defaults to False, so the default path is OA-only.
-        return "default path is native -> OA repositories -> Unpaywall; Sci-Hub only with --allow-scihub"
+        assert "--no-scihub" in p.stdout, "--no-scihub missing from help"
+        # Sci-Hub stays the last resort: upstream only reaches it after the
+        # native downloader, OA repositories and Unpaywall have all failed.
+        # Checked through the same runner as the CLI, since the plain-python
+        # test process need not have the library installed.
+        probe = subprocess.run(
+            (["uv", "run", "--quiet", "--with", "paper-search-mcp==0.1.4", "python"]
+             if shutil.which("uv") else [sys.executable]) +
+            ["-c", "import paper_search_mcp.server as s;"
+                   "print(s.download_with_fallback.__doc__ or '')"],
+            capture_output=True, text=True, timeout=180)
+        order = "checked" if "then optional Sci-Hub" in probe.stdout else "UNVERIFIED"
+        assert order == "checked", (
+            f"upstream chain order changed or unreadable: {probe.stdout[:120]}")
+        return ("default chain is native -> OA repositories -> Unpaywall -> Sci-Hub "
+                "(order verified upstream); --no-scihub stops after Unpaywall")
 
     if not args.quick:
         # --- 10. Real PDF download ----------------------------------------

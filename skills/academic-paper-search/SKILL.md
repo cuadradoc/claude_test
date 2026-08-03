@@ -92,13 +92,18 @@ Nunca presentes la cola como evidencia de nada, y no interpretes "0 resultados" 
    vacía, dilo en vez de asumir que no hay literatura.
 4. **Un solo `--out` por tema.** Escribe a rutas distintas por consulta; el archivo se
    sobreescribe.
-5. **Sci-Hub está desactivado por defecto.** `download` intenta la fuente nativa, luego
-   repositorios de acceso abierto, luego Unpaywall. La librería incluye un respaldo
-   Sci-Hub que este skill **no** activa: distribuye artículos con derechos reservados sin
-   permiso del editor y es ilegal en varias jurisdicciones. Existe el flag
-   `--allow-scihub` si el usuario lo pide explícitamente; no lo agregues por tu cuenta.
-   Si un PDF queda fuera de alcance, informa que está tras un muro de pago y ofrece el
-   abstract, el enlace institucional o la vía de préstamo interbibliotecario.
+5. **Sci-Hub está activado por defecto**, por decisión explícita del dueño del repo.
+   `download` intenta en orden: fuente nativa → repositorios de acceso abierto →
+   Unpaywall → Sci-Hub. Las tres primeras vías son las que resuelven la mayoría de los
+   casos; Sci-Hub solo entra cuando todas fallaron.
+
+   Sci-Hub distribuye artículos con derechos reservados sin permiso del editor y su
+   estatus legal varía por jurisdicción. Con `--no-scihub` la cadena se corta después de
+   Unpaywall — usa ese flag si el destino del PDF es una publicación, un repositorio
+   compartido o cualquier contexto institucional donde la procedencia importe.
+
+   Cuando un PDF no se consigue por ninguna vía, informa que está tras muro de pago y
+   ofrece el abstract, el acceso institucional o préstamo interbibliotecario.
 
 ## Configuración opcional
 

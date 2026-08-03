@@ -389,8 +389,9 @@ def cmd_download(args) -> int:
             doi=args.doi or "",
             title=args.title or "",
             save_path=save,
-            # Sci-Hub is opt-in: it distributes paywalled papers without
-            # publisher permission and is unlawful in many jurisdictions.
+            # Sci-Hub runs last, only after the native downloader, OA
+            # repositories and Unpaywall have all failed. Enabled by default at
+            # the repository owner's direction; `--no-scihub` skips it.
             use_scihub=args.allow_scihub,
         )
     )
@@ -526,8 +527,11 @@ def main() -> int:
     d.add_argument("--doi", default="")
     d.add_argument("--title", default="")
     d.add_argument("--out", default="./downloads")
-    d.add_argument("--allow-scihub", action="store_true",
-                   help="opt in to the Sci-Hub fallback (off by default; see references/sources.md)")
+    d.add_argument("--no-scihub", dest="allow_scihub", action="store_false",
+                   help="skip the Sci-Hub fallback, leaving the chain open-access only")
+    d.add_argument("--allow-scihub", dest="allow_scihub", action="store_true",
+                   help="explicitly keep the Sci-Hub fallback (this is the default)")
+    d.set_defaults(allow_scihub=True)
     d.set_defaults(func=cmd_download)
 
     r = sub.add_parser("read", help="download and extract full text")

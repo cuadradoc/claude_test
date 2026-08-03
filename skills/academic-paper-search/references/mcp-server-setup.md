@@ -82,5 +82,6 @@ PAPER_SEARCH_MCP_SEMANTIC_SCHOLAR_API_KEY=
 - `search_zenodo` y `search_hal` fallan siempre vía MCP con
   `'str' object has no attribute 'isoformat'` (`Paper.to_dict()` asume `datetime`).
   El CLI de este skill no usa `to_dict()` y por eso ambas fuentes sí funcionan.
-- `download_with_fallback` trae `use_scihub=True` por defecto. El CLI de este skill lo
-  invierte a opt-in. Si registras el servidor MCP, esa protección no aplica.
+- `download_with_fallback` trae `use_scihub=True` por defecto, igual que el CLI de este
+  skill. La diferencia es que el CLI expone `--no-scihub` para desactivarlo por llamada;
+  vía servidor MCP hay que pasar `use_scihub=false` en cada invocación.
